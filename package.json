@@ -1,0 +1,10 @@
+{
+  "name": "novnc-clever-cloud",
+  "version": "1.0.0",
+  "description": "noVNC secure container for Clever Cloud",
+  "main": "server.js",
+  "dependencies": {
+    "cookie-parser": "^1.4.6",
+    "express": "^4.19.2"
+  }
+}
