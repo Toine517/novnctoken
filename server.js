@@ -2,6 +2,8 @@ const { spawn } = require('child_process');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
+const fs = require('fs');
+const path = require('path');
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
@@ -9,11 +11,19 @@ app.use(cookieParser());
 
 // Mot de passe administrateur récupéré depuis Clever Cloud (ou valeur par défaut sécurisée)
 const ADMIN_PASSWORD = process.env.VNC_ADMIN_PASSWORD || crypto.randomBytes(16).toString('hex');
+const VNC_PASS_FILE = path.join(process.env.HOME, '.vnc', 'passwd');
 console.log(`[INIT] Mot de passe d'accès généré/configuré.`);
+execSync(`mkdir -p ${path.dirname(VNC_PASS_FILE)}`);
+// Utilisation de vncpasswd pour écrire le mot de passe haché sans interaction
+execSync(`printf "%s\n%s\n" "${ADMIN_PASSWORD}" "${ADMIN_PASSWORD}" | vncpasswd -f > ${VNC_PASS_FILE}`);
+execSync(`chmod 600 ${VNC_PASS_FILE}`);
 
 // 1. Démarrage de TigerVNC (affichage virtuel :1)
-const vncServer = spawn('vncserver', [':1', '-geometry', '1280x720', '-depth', '24', '-localhost', 'no']);
+const vncServer = spawn('vncserver', [':1', '-geometry', '1280x720', '-depth', '24', '-localhost', 'no'], {
+    env: { ...process.env, HOME: process.env.HOME }
+});
 vncServer.stdout.on('data', (data) => console.log(`[VNC]: ${data}`));
+vncServer.stderr.on('data', (data) => console.error(`[VNC Error]: ${data}`));
 
 // 2. Démarrage de Websockify (pont entre le navigateur et VNC)
 setTimeout(() => {
