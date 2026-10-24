@@ -22,8 +22,12 @@ RUN useradd -m -s /bin/bash appuser
 WORKDIR /home/appuser
 
 # Copie des fichiers de configuration et du serveur d'authentification
+COPY package.json /home/appuser/package.json
 COPY nginx.conf /etc/nginx/sites-available/default
 COPY server.js /home/appuser/server.js
+
+# Installation des dépendances Node.js
+RUN npm install
 
 # Configuration des permissions
 RUN chown -R appuser:appuser /home/appuser
