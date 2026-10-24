@@ -1,4 +1,4 @@
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const crypto = require('crypto');
